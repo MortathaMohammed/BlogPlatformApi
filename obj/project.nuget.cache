@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "tMA6fsgf9l0=",
+  "success": true,
+  "projectFilePath": "/home/mdrazor/program/BlogPlatformApi/BlogPlatformApi.csproj",
+  "expectedPackageFiles": [
+    "/home/mdrazor/.nuget/packages/dapper/2.1.35/dapper.2.1.35.nupkg.sha512",
+    "/home/mdrazor/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "/home/mdrazor/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.0/microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
+    "/home/mdrazor/.nuget/packages/npgsql/8.0.3/npgsql.8.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
