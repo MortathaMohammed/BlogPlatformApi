@@ -1,16 +1,15 @@
 
 using System.Data;
-using System.Transactions;
 using BlogPlatformApi.Models;
 using BlogPlatformApi.Repository.IRepository;
 using Dapper;
 using Npgsql;
 
 namespace BlogPlatformApi.Repository;
-public class PostRepository : IGenericRejpository<Post>
+public class PostRepository : IGenericRejpository<Post>, IPostRepository
 {
-    private NpgsqlConnection _npgsqlConnection;
-    private IDbTransaction _dbTransaction;
+    private readonly NpgsqlConnection _npgsqlConnection;
+    private readonly IDbTransaction _dbTransaction;
 
     public PostRepository(NpgsqlConnection npgsqlConnection, IDbTransaction dbTransaction)
     {
@@ -60,6 +59,7 @@ public class PostRepository : IGenericRejpository<Post>
             category = @Category,
             publicationdate = @PublicationDate,
             tags = @Tags
+            WHERE id = @Id
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, post, transaction: _dbTransaction);
         return result;

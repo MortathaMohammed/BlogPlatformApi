@@ -1,7 +1,7 @@
 namespace BlogPlatformApi.Repository.IRepository;
 public interface IUnitOfWork
 {
-    IBlogUserRepository Blogs { get; }
+    IBlogUserRepository Users { get; }
     ICommentRepository Comments { get; }
     IInteractionRepository Interactions { get; }
     IPostRepository Posts { get; }

@@ -6,10 +6,10 @@ using Npgsql;
 
 namespace BlogPlatformApi.Repository;
 
-public class BlogUserRepository : IBlogUserRepository
+public class BlogUserRepository : IBlogUserRepository, IGenericRejpository<BlogUser>
 {
-    private NpgsqlConnection _npgsqlConnection;
-    private IDbTransaction _dbTransaction;
+    private readonly NpgsqlConnection _npgsqlConnection;
+    private readonly IDbTransaction _dbTransaction;
 
     public BlogUserRepository(NpgsqlConnection npgsqlConnection, IDbTransaction dbTransaction)
     {
@@ -49,6 +49,13 @@ public class BlogUserRepository : IBlogUserRepository
         return result;
     }
 
+    public async Task<BlogUser> GetUserByUserName(string userName)
+    {
+        var sql = "SELECT * FROM BlogUser WHERE username = @Username";
+        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<BlogUser>(sql, new { Username = userName }, transaction: _dbTransaction);
+        return result!;
+    }
+
     public async Task<int> UpdateAsync(BlogUser user)
     {
         var sql =
@@ -57,7 +64,8 @@ public class BlogUserRepository : IBlogUserRepository
         username = @Username,
         email = @Email,
         password = @Password,
-        bio = @Bio
+        bio = @Bio 
+        WHERE id = @Id
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, user, transaction: _dbTransaction);
         return result;

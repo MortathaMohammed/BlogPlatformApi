@@ -6,7 +6,7 @@ using Dapper;
 using Npgsql;
 
 namespace BlogPlatformApi.Repository;
-public class InteractionRepository : IGenericRejpository<Interaction>
+public class InteractionRepository : IGenericRejpository<Interaction>, IInteractionRepository
 {
     private NpgsqlConnection _npgsqlConnection;
     private IDbTransaction _dbTransaction;
@@ -57,6 +57,7 @@ public class InteractionRepository : IGenericRejpository<Interaction>
             postid = @PostId,
             bloguserid = @BlogUserId,
             type = @Type
+            WHERE id = @Id
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, interaction, transaction: _dbTransaction);
         return result;

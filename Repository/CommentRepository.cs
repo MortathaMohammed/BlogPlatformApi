@@ -7,7 +7,7 @@ using Npgsql;
 
 namespace BlogPlatformApi.Repository;
 
-public class CommentRepository : IGenericRejpository<Comment>
+public class CommentRepository : IGenericRejpository<Comment>, ICommentRepository
 {
     private NpgsqlConnection _npgsqlConnection;
     private IDbTransaction _dbTransaction;
@@ -57,6 +57,7 @@ public class CommentRepository : IGenericRejpository<Comment>
         postid = @PostId,
         bloguserid = @BlogUserId,
         timestamp = @Timestamp
+        WHERE id = @Id
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, comment, _dbTransaction);
         return result;

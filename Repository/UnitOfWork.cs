@@ -6,12 +6,12 @@ namespace BlogPlatformApi.Repository;
 public class UnitOfWork : IUnitOfWork, IDisposable
 {
 
-    public IBlogUserRepository Blogs { get; }
+    public IBlogUserRepository Users { get; }
     public ICommentRepository Comments { get; }
     public IInteractionRepository Interactions { get; }
     public IPostRepository Posts { get; }
 
-    IDbTransaction _dbTransaction;
+    private readonly IDbTransaction _dbTransaction;
 
     public UnitOfWork(
                 IDbTransaction dbTransaction,
@@ -20,7 +20,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
                 IPostRepository postRepository,
                 IInteractionRepository interactionRepository)
     {
-        Blogs = userRepository;
+        Users = userRepository;
         Comments = commentRepository;
         Interactions = interactionRepository;
         Posts = postRepository;

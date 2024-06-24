@@ -26,3 +26,5 @@
 /home/mdrazor/program/BlogPlatformApi/obj/Debug/net8.0/BlogPlatformApi.pdb
 /home/mdrazor/program/BlogPlatformApi/obj/Debug/net8.0/BlogPlatformApi.genruntimeconfig.cache
 /home/mdrazor/program/BlogPlatformApi/obj/Debug/net8.0/ref/BlogPlatformApi.dll
+/home/mdrazor/program/BlogPlatformApi/bin/Debug/net8.0/Npgsql.dll
+/home/mdrazor/program/BlogPlatformApi/obj/Debug/net8.0/BlogPlatformApi.sourcelink.json
