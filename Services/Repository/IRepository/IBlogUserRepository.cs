@@ -1,6 +1,6 @@
 using BlogPlatformApi.Models;
 
-namespace BlogPlatformApi.Repository.IRepository;
+namespace BlogPlatformApi.Services.Repository.IRepository;
 
 public interface IBlogUserRepository : IGenericRejpository<BlogUser>
 {

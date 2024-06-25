@@ -1,8 +1,8 @@
 
 using System.Data;
-using BlogPlatformApi.Repository.IRepository;
+using BlogPlatformApi.Services.Repository.IRepository;
 
-namespace BlogPlatformApi.Repository;
+namespace BlogPlatformApi.Services.Repository;
 public class UnitOfWork : IUnitOfWork, IDisposable
 {
 

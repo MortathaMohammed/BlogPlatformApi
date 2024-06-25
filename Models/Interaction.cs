@@ -5,5 +5,5 @@ public class Interaction
     public required int PostId { get; set; }
     public required int BlogUserId { get; set; }
     public required string Type { get; set; }
-
+    public DateTime Timestamp { get; set; } = DateTime.Now;
 }

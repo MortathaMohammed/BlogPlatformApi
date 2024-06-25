@@ -1,11 +1,11 @@
 
 using System.Data;
 using BlogPlatformApi.Models;
-using BlogPlatformApi.Repository.IRepository;
+using BlogPlatformApi.Services.Repository.IRepository;
 using Dapper;
 using Npgsql;
 
-namespace BlogPlatformApi.Repository;
+namespace BlogPlatformApi.Services.Repository;
 public class InteractionRepository : IGenericRejpository<Interaction>, IInteractionRepository
 {
     private NpgsqlConnection _npgsqlConnection;
@@ -21,8 +21,8 @@ public class InteractionRepository : IGenericRejpository<Interaction>, IInteract
     {
         var sql =
         """
-            INSERT INTO Interaction(postid, bloguserid, type)
-            VALUES (@PostId, @BlogUserId, @Type)
+            INSERT INTO Interaction(postid, bloguserid, type, timestamp)
+            VALUES (@PostId, @BlogUserId, @Type, @Timestamp)
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, interaction, transaction: _dbTransaction);
         return result;
@@ -45,8 +45,22 @@ public class InteractionRepository : IGenericRejpository<Interaction>, IInteract
     public async Task<Interaction?> GetByIdAsync(int id)
     {
         var sql = "SELECT * FROM Interaction WHERE id = @Id";
-        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync(sql, new { Id = id }, transaction: _dbTransaction);
+        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<Interaction>(sql, new { Id = id }, transaction: _dbTransaction);
         return result;
+    }
+
+    public async Task<IReadOnlyList<Interaction>> GetInteractionsByPostId(int id)
+    {
+        var sql = "SELECT * FROM Interaction WHERE postid = @PostId";
+        var result = await _npgsqlConnection.QueryAsync<Interaction>(sql, new { PostId = id }, transaction: _dbTransaction);
+        return result.ToList();
+    }
+
+    public async Task<IReadOnlyList<Interaction>> GetInteractionsByUserId(int id)
+    {
+        var sql = "SELECT * FROM Interaction WHERE bloguserid = @BlogUserId";
+        var result = await _npgsqlConnection.QueryAsync<Interaction>(sql, new { BlogUserId = id }, transaction: _dbTransaction);
+        return result.ToList();
     }
 
     public async Task<int> UpdateAsync(Interaction interaction)
@@ -56,7 +70,8 @@ public class InteractionRepository : IGenericRejpository<Interaction>, IInteract
             UPDATE Interaction SET
             postid = @PostId,
             bloguserid = @BlogUserId,
-            type = @Type
+            type = @Type,
+            timestamp = @Timestamp
             WHERE id = @Id
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, interaction, transaction: _dbTransaction);

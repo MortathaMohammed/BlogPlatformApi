@@ -1,11 +1,11 @@
 
 using System.Data;
 using BlogPlatformApi.Models;
-using BlogPlatformApi.Repository.IRepository;
+using BlogPlatformApi.Services.Repository.IRepository;
 using Dapper;
 using Npgsql;
 
-namespace BlogPlatformApi.Repository;
+namespace BlogPlatformApi.Services.Repository;
 public class PostRepository : IGenericRejpository<Post>, IPostRepository
 {
     private readonly NpgsqlConnection _npgsqlConnection;
@@ -47,6 +47,13 @@ public class PostRepository : IGenericRejpository<Post>, IPostRepository
         var sql = "SELECT * FROM Post WHERE id = @Id";
         var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<Post>(sql, new { Id = id }, transaction: _dbTransaction);
         return result;
+    }
+
+    public async Task<Post> GetPostByTitle(string title)
+    {
+        var sql = "SELECT * FROM Post WHERE title = @Title";
+        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<Post>(sql, new { Title = title }, transaction: _dbTransaction);
+        return result!;
     }
 
     public async Task<int> UpdateAsync(Post post)

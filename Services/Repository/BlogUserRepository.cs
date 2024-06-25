@@ -1,10 +1,10 @@
 using System.Data;
 using BlogPlatformApi.Models;
-using BlogPlatformApi.Repository.IRepository;
+using BlogPlatformApi.Services.Repository.IRepository;
 using Dapper;
 using Npgsql;
 
-namespace BlogPlatformApi.Repository;
+namespace BlogPlatformApi.Services.Repository;
 
 public class BlogUserRepository : IBlogUserRepository, IGenericRejpository<BlogUser>
 {

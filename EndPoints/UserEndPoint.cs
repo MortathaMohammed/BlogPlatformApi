@@ -1,5 +1,5 @@
 using BlogPlatformApi.Models;
-using BlogPlatformApi.Repository.IRepository;
+using BlogPlatformApi.Services.Repository.IRepository;
 
 namespace BlogPlatformApi.EndPoints;
 public static class UserEndPoint

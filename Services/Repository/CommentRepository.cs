@@ -1,11 +1,11 @@
 
 using System.Data;
 using BlogPlatformApi.Models;
-using BlogPlatformApi.Repository.IRepository;
+using BlogPlatformApi.Services.Repository.IRepository;
 using Dapper;
 using Npgsql;
 
-namespace BlogPlatformApi.Repository;
+namespace BlogPlatformApi.Services.Repository;
 
 public class CommentRepository : IGenericRejpository<Comment>, ICommentRepository
 {
@@ -22,8 +22,8 @@ public class CommentRepository : IGenericRejpository<Comment>, ICommentRepositor
     {
         var sql =
         """
-            INSERT INTO Comment(postid, bloguserid, timestamp)
-            VALUES(@PostId, @BlogUserId, @Timestamp);
+            INSERT INTO Comment(postid, bloguserid, content, timestamp)
+            VALUES(@PostId, @BlogUserId, @Content, @Timestamp);
         """;
         return await _npgsqlConnection.ExecuteAsync(sql, comment, transaction: _dbTransaction);
     }
@@ -45,8 +45,22 @@ public class CommentRepository : IGenericRejpository<Comment>, ICommentRepositor
     public async Task<Comment?> GetByIdAsync(int id)
     {
         var sql = "SELECT * FROM Comment WHERE id = @Id";
-        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync(sql, new { Id = id }, _dbTransaction);
+        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<Comment>(sql, new { Id = id }, _dbTransaction);
         return result;
+    }
+
+    public async Task<IReadOnlyList<Comment>> GetCommentsByPostId(int id)
+    {
+        var sql = "SELECT * FROM Comment WHERE postid = @PostId";
+        var result = await _npgsqlConnection.QueryAsync<Comment>(sql, new { PostId = id });
+        return result.ToList();
+    }
+
+    public async Task<IReadOnlyList<Comment>> GetCommentsByUserId(int id)
+    {
+        var sql = "SELECT * FROM Comment WHERE bloguserid = @BlogUserId";
+        var result = await _npgsqlConnection.QueryAsync<Comment>(sql, new { BlogUserId = id });
+        return result.ToList();
     }
 
     public async Task<int> UpdateAsync(Comment comment)
@@ -56,6 +70,7 @@ public class CommentRepository : IGenericRejpository<Comment>, ICommentRepositor
         UPDATE Comment SET
         postid = @PostId,
         bloguserid = @BlogUserId,
+        content = @Content,
         timestamp = @Timestamp
         WHERE id = @Id
         """;

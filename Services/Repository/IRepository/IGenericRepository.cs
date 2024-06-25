@@ -1,4 +1,4 @@
-namespace BlogPlatformApi.Repository.IRepository;
+namespace BlogPlatformApi.Services.Repository.IRepository;
 
 public interface IGenericRejpository<T> where T : class
 {
