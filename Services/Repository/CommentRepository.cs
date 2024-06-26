@@ -22,43 +22,43 @@ public class CommentRepository : IGenericRejpository<Comment>, ICommentRepositor
     {
         var sql =
         """
-            INSERT INTO Comment(postid, bloguserid, content, timestamp)
-            VALUES(@PostId, @BlogUserId, @Content, @Timestamp);
+            INSERT INTO comments(comment_id, post_id, user_id, content, created_at)
+            VALUES(@Id, @PostId, @UserId, @Content, @CreatedAt);
         """;
         return await _npgsqlConnection.ExecuteAsync(sql, comment, transaction: _dbTransaction);
     }
 
-    public async Task<int> DeleteAsync(int id)
+    public async Task<int> DeleteAsync(string id)
     {
-        var sql = "DELETE FROM Comment WHERE id = @Id";
+        var sql = "DELETE FROM comments WHERE comment_id = @Id";
         var result = await _npgsqlConnection.ExecuteAsync(sql, new { Id = id }, transaction: _dbTransaction);
         return result;
     }
 
     public async Task<IReadOnlyList<Comment>> GetAllAsync()
     {
-        var sql = "SELECT * FROM Comment";
+        var sql = "SELECT * FROM comment";
         var result = await _npgsqlConnection.QueryAsync<Comment>(sql);
         return result.ToList();
     }
 
-    public async Task<Comment?> GetByIdAsync(int id)
+    public async Task<Comment?> GetByIdAsync(string id)
     {
-        var sql = "SELECT * FROM Comment WHERE id = @Id";
+        var sql = "SELECT * FROM comments WHERE comment_id = @Id";
         var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<Comment>(sql, new { Id = id }, _dbTransaction);
         return result;
     }
 
-    public async Task<IReadOnlyList<Comment>> GetCommentsByPostId(int id)
+    public async Task<IReadOnlyList<Comment>> GetCommentsByPostId(string id)
     {
-        var sql = "SELECT * FROM Comment WHERE postid = @PostId";
+        var sql = "SELECT * FROM comments WHERE post_id = @PostId";
         var result = await _npgsqlConnection.QueryAsync<Comment>(sql, new { PostId = id });
         return result.ToList();
     }
 
-    public async Task<IReadOnlyList<Comment>> GetCommentsByUserId(int id)
+    public async Task<IReadOnlyList<Comment>> GetCommentsByUserId(string id)
     {
-        var sql = "SELECT * FROM Comment WHERE bloguserid = @BlogUserId";
+        var sql = "SELECT * FROM comments WHERE user_id = @UserId";
         var result = await _npgsqlConnection.QueryAsync<Comment>(sql, new { BlogUserId = id });
         return result.ToList();
     }
@@ -67,12 +67,12 @@ public class CommentRepository : IGenericRejpository<Comment>, ICommentRepositor
     {
         var sql =
         """
-        UPDATE Comment SET
-        postid = @PostId,
-        bloguserid = @BlogUserId,
+        UPDATE comments SET
+        post_id = @PostId,
+        user_id = @UserId,
         content = @Content,
-        timestamp = @Timestamp
-        WHERE id = @Id
+        created_at = @CreatedAt
+        WHERE comment_id = @Id
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, comment, _dbTransaction);
         return result;

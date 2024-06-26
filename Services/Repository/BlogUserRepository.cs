@@ -21,37 +21,37 @@ public class BlogUserRepository : IBlogUserRepository, IGenericRejpository<BlogU
     {
         var sql =
         """
-        INSERT INTO BlogUser (username, email, password, bio)
-        VALUES (@Username, @Email, @Password, @Bio);
+        INSERT INTO user_blog (user_id, username, email, password_hash,created_at, bio)
+        VALUES (@Id, @Username, @Email, @PasswordHash, @CreatedAt, @Bio);
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, user, transaction: _dbTransaction);
         return result;
     }
 
-    public async Task<int> DeleteAsync(int id)
+    public async Task<int> DeleteAsync(string id)
     {
-        var sql = "DELETE FROM BlogUser WHERE id = @Id";
+        var sql = "DELETE FROM user_blog WHERE user_id = @Id";
         var result = await _npgsqlConnection.ExecuteAsync(sql, new { Id = id }, transaction: _dbTransaction);
         return result;
     }
 
     public async Task<IReadOnlyList<BlogUser>> GetAllAsync()
     {
-        var sql = "SELECT * FROM BlogUser";
+        var sql = "SELECT * FROM user_blog";
         var result = await _npgsqlConnection.QueryAsync<BlogUser>(sql);
         return result.ToList();
     }
 
-    public async Task<BlogUser?> GetByIdAsync(int id)
+    public async Task<BlogUser?> GetByIdAsync(string id)
     {
-        var sql = "SELECT * FROM BlogUser WHERE id = @Id";
+        var sql = "SELECT * FROM user_blog WHERE user_id = @Id";
         var result = await _npgsqlConnection.QuerySingleOrDefaultAsync<BlogUser>(sql, new { Id = id }, transaction: _dbTransaction);
         return result;
     }
 
     public async Task<BlogUser> GetUserByUserName(string userName)
     {
-        var sql = "SELECT * FROM BlogUser WHERE username = @Username";
+        var sql = "SELECT * FROM user_blog WHERE username = @Username";
         var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<BlogUser>(sql, new { Username = userName }, transaction: _dbTransaction);
         return result!;
     }
@@ -60,12 +60,13 @@ public class BlogUserRepository : IBlogUserRepository, IGenericRejpository<BlogU
     {
         var sql =
         """
-        UPDATE BlogUser SET  
+        UPDATE user_blog SET  
         username = @Username,
         email = @Email,
-        password = @Password,
+        password_hash = @PasswordHash,
+        created_at = @CreatedAt
         bio = @Bio 
-        WHERE id = @Id
+        WHERE user_id = @Id
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, user, transaction: _dbTransaction);
         return result;

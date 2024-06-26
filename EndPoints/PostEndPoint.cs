@@ -12,7 +12,15 @@ public static class PostEndPoint
         return TypedResults.Ok(result);
     }
 
-    public static async Task<IResult> GetPostById(int id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> GetPostsByUser(string id, IUnitOfWork _unitOfWork)
+    {
+        var result = await _unitOfWork.Posts.GetPostsByUser(id);
+        if (result == null)
+            return TypedResults.NotFound();
+        return TypedResults.Ok(result);
+    }
+
+    public static async Task<IResult> GetPostById(string id, IUnitOfWork _unitOfWork)
     {
         var result = await _unitOfWork.Posts.GetByIdAsync(id);
         if (result == null)
@@ -39,7 +47,7 @@ public static class PostEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> EditPost(int id, IUnitOfWork _unitOfWork, Post post)
+    public static async Task<IResult> EditPost(string id, IUnitOfWork _unitOfWork, Post post)
     {
         if (post == null)
             return TypedResults.BadRequest("The post is empty");
@@ -63,7 +71,7 @@ public static class PostEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> DeletePost(int id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> DeletePost(string id, IUnitOfWork _unitOfWork)
     {
         var post = await _unitOfWork.Posts.GetByIdAsync(id);
 

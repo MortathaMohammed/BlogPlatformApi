@@ -8,9 +8,9 @@ public class UnitOfWork : IUnitOfWork, IDisposable
 
     public IBlogUserRepository Users { get; }
     public ICommentRepository Comments { get; }
-    public IInteractionRepository Interactions { get; }
     public IPostRepository Posts { get; }
-
+    public IReplyCommentsRepository ReplyComments { get; }
+    public ITagsRepository Tags { get; }
     private readonly IDbTransaction _dbTransaction;
 
     public UnitOfWork(
@@ -18,12 +18,14 @@ public class UnitOfWork : IUnitOfWork, IDisposable
                 IBlogUserRepository userRepository,
                 ICommentRepository commentRepository,
                 IPostRepository postRepository,
-                IInteractionRepository interactionRepository)
+                IReplyCommentsRepository replyComments,
+                ITagsRepository tags)
     {
         Users = userRepository;
         Comments = commentRepository;
-        Interactions = interactionRepository;
         Posts = postRepository;
+        ReplyComments = replyComments;
+        Tags = tags;
         _dbTransaction = dbTransaction;
     }
 

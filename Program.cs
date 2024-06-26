@@ -9,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IBlogUserRepository, BlogUserRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<IInteractionRepository, InteractionRepository>();
+builder.Services.AddScoped<IReplyCommentsRepository, ReplyCommentsRepository>();
+builder.Services.AddScoped<ITagsRepository, TagsRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped((s) => new NpgsqlConnection(builder.Configuration.GetConnectionString("dbConnection")));
@@ -26,36 +27,45 @@ var app = builder.Build();
 
 #region User
 app.MapGet("/user/users", UserEndPoint.GetUsers);
-app.MapGet("/user/{id:int}", UserEndPoint.GetUserById);
+app.MapGet("/user/{id}", UserEndPoint.GetUserById);
 app.MapPost("/user/add", UserEndPoint.AddUser);
-app.MapPut("/user/edit/{id:int}", UserEndPoint.EditUser);
-app.MapDelete("/user/delete/{id:int}", UserEndPoint.DeleteUser);
+app.MapPut("/user/edit/{id}", UserEndPoint.EditUser);
+app.MapDelete("/user/delete/{id}", UserEndPoint.DeleteUser);
 #endregion
 
 #region Post
 app.MapGet("/post/posts", PostEndPoint.GetPosts);
-app.MapGet("/post/{id:int}", PostEndPoint.GetPostById);
+app.MapGet("/post/user/{id}", PostEndPoint.GetPostsByUser);
+app.MapGet("/post/{id}", PostEndPoint.GetPostById);
 app.MapPost("/post/add", PostEndPoint.AddPost);
-app.MapPut("/post/edit/{id:int}", PostEndPoint.EditPost);
-app.MapDelete("/post/delete/{id:int}", PostEndPoint.DeletePost);
+app.MapPut("/post/edit/{id}", PostEndPoint.EditPost);
+app.MapDelete("/post/delete/{id}", PostEndPoint.DeletePost);
 #endregion
 
 #region Comment
-app.MapGet("/comment/post/{id:int}", CommentEndPoint.GetCommentsByPost);
-app.MapGet("/comment/user/{id:int}", CommentEndPoint.GetCommentsByUser);
-app.MapGet("/comment/{id:int}", CommentEndPoint.GetCommentById);
+app.MapGet("/comment/post/{id}", CommentEndPoint.GetCommentsByPost);
+app.MapGet("/comment/user/{id}", CommentEndPoint.GetCommentsByUser);
+app.MapGet("/comment/{id}", CommentEndPoint.GetCommentById);
 app.MapPost("/comment/add", CommentEndPoint.AddComment);
-app.MapPut("/comment/edit/{id:int}", CommentEndPoint.EditComment);
-app.MapDelete("/comment/delete/{id:int}", CommentEndPoint.DeleteComment);
+app.MapPut("/comment/edit/{id}", CommentEndPoint.EditComment);
+app.MapDelete("/comment/delete/{id}", CommentEndPoint.DeleteComment);
 #endregion
 
-#region Interaction
-app.MapGet("/interaction/post/{id:int}", InteractionEndPoint.GetInteractionByPost);
-app.MapGet("/interaction/user/{id:int}", InteractionEndPoint.GetInteractionByUser);
-app.MapGet("/interaction/{id:int}", InteractionEndPoint.GetInteractionById);
-app.MapPost("/interaction/add", InteractionEndPoint.AddInteraction);
-app.MapPut("/interaction/edit/{id:int}", InteractionEndPoint.EditInteraction);
-app.MapDelete("/interaction/delete/{id:int}", InteractionEndPoint.DeleteInteraction);
+#region Comment
+app.MapGet("/replycomments/user/{id}", ReplyCommentsEndPoint.GetReplyCommentsByUser);
+app.MapGet("/replycomments/parent/{id}", ReplyCommentsEndPoint.GetReplyCommentsByParent);
+app.MapGet("/replycomments/{id}", ReplyCommentsEndPoint.GetReplyCommentsById);
+app.MapPost("/replycomments/add", ReplyCommentsEndPoint.AddReplyComments);
+app.MapPut("/replycommetns/edit/{id}", ReplyCommentsEndPoint.EditReplyComments);
+app.MapDelete("/replycomments/delete/{id}", ReplyCommentsEndPoint.DeleteReplyComments);
+#endregion
+
+#region Comment
+app.MapGet("/tag/tags", TagEndPoint.GetTags);
+app.MapGet("/tag/{id}", TagEndPoint.GetTagById);
+app.MapPost("/tag/add", TagEndPoint.AddTag);
+app.MapPut("/tag/edit/{id}", TagEndPoint.EditTag);
+app.MapDelete("/tag/delete/{id}", TagEndPoint.DeleteTag);
 #endregion
 
 #endregion

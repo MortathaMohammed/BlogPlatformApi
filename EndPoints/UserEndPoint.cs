@@ -12,7 +12,7 @@ public static class UserEndPoint
         return TypedResults.Ok(result);
     }
 
-    public static async Task<IResult> GetUserById(int id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> GetUserById(string id, IUnitOfWork _unitOfWork)
     {
         var result = await _unitOfWork.Users.GetByIdAsync(id);
         if (result == null)
@@ -39,7 +39,7 @@ public static class UserEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> EditUser(int id, IUnitOfWork _unitOfWork, BlogUser user)
+    public static async Task<IResult> EditUser(string id, IUnitOfWork _unitOfWork, BlogUser user)
     {
         if (user == null)
             return TypedResults.BadRequest();
@@ -63,7 +63,7 @@ public static class UserEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> DeleteUser(int id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> DeleteUser(string id, IUnitOfWork _unitOfWork)
     {
         var user = await _unitOfWork.Users.GetByIdAsync(id);
 

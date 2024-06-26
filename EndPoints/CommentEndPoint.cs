@@ -4,7 +4,7 @@ using BlogPlatformApi.Services.Repository.IRepository;
 namespace BlogPlatformApi.EndPoints;
 public static class CommentEndPoint
 {
-    public static async Task<IResult> GetCommentsByPost(int id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> GetCommentsByPost(string id, IUnitOfWork _unitOfWork)
     {
         var comments = await _unitOfWork.Comments.GetCommentsByPostId(id);
         if (comments == null)
@@ -12,7 +12,7 @@ public static class CommentEndPoint
         return TypedResults.Ok(comments);
     }
 
-    public static async Task<IResult> GetCommentsByUser(int id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> GetCommentsByUser(string id, IUnitOfWork _unitOfWork)
     {
         var result = await _unitOfWork.Comments.GetCommentsByUserId(id);
         if (result == null)
@@ -20,7 +20,7 @@ public static class CommentEndPoint
         return TypedResults.Ok(result);
     }
 
-    public static async Task<IResult> GetCommentById(int id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> GetCommentById(string id, IUnitOfWork _unitOfWork)
     {
         var result = await _unitOfWork.Comments.GetByIdAsync(id);
         if (result == null)
@@ -42,7 +42,7 @@ public static class CommentEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> EditComment(int id, IUnitOfWork _unitOfWork, Comment comment)
+    public static async Task<IResult> EditComment(string id, IUnitOfWork _unitOfWork, Comment comment)
     {
         if (comment == null)
             return TypedResults.BadRequest("Empty body");
@@ -61,7 +61,7 @@ public static class CommentEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> DeleteComment(int id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> DeleteComment(string id, IUnitOfWork _unitOfWork)
     {
         var comment = await _unitOfWork.Comments.GetByIdAsync(id);
 

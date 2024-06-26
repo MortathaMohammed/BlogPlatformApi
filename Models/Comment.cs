@@ -1,9 +1,9 @@
 namespace BlogPlatformApi.Models;
 public class Comment
 {
-    public int Id { get; set; }
-    public required int PostId { get; set; }
-    public required int BlogUserId { get; set; }
-    public string? Content { get; set; }
-    public DateTime Timestamp { get; set; } = DateTime.Now;
+    public Guid Id { get;  }= Guid.NewGuid();
+    public required string PostId { get; set; }
+    public required string UserId { get; set; }
+    public required string Content { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 }
