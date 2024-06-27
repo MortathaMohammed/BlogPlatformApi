@@ -1,8 +1,8 @@
 namespace BlogPlatformApi.Models;
 public class Post
 {
-    public Guid Id { get; } = Guid.NewGuid();
-    public required string UserId { get; set; }
+    public Guid Id { get; set; }
+    public required Guid UserId { get; set; }
     public BlogUser? User { get; set; }
     public required string Title { get; set; }
     public required string Content { get; set; }

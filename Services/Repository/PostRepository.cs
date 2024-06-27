@@ -6,7 +6,7 @@ using Dapper;
 using Npgsql;
 
 namespace BlogPlatformApi.Services.Repository;
-public class PostRepository : IGenericRejpository<Post>, IPostRepository
+public class PostRepository : IPostRepository
 {
     private readonly NpgsqlConnection _npgsqlConnection;
     private readonly IDbTransaction _dbTransaction;
@@ -21,16 +21,16 @@ public class PostRepository : IGenericRejpository<Post>, IPostRepository
     {
         var sql =
         """
-            INSERT INTO posts(post_id, user_id, title, content, created_at)
-            VALUES (@Id, @UserId, @Title, @Content, @CreatedAt)
+            INSERT INTO posts(post_uid, user_uid, title, content, created_at)
+            VALUES (uuid_generate_v4(), @UserId, @Title, @Content, @CreatedAt)
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, post, transaction: _dbTransaction);
         return result;
     }
 
-    public async Task<int> DeleteAsync(string id)
+    public async Task<int> DeleteAsync(Guid id)
     {
-        var sql = "DELETE FROM posts WHERE post_id = @Id";
+        var sql = "DELETE FROM posts WHERE post_uid = @Id";
         var result = await _npgsqlConnection.ExecuteAsync(sql, new { Id = id }, transaction: _dbTransaction);
         return result;
     }
@@ -38,28 +38,61 @@ public class PostRepository : IGenericRejpository<Post>, IPostRepository
     public async Task<IReadOnlyList<Post>> GetAllAsync()
     {
         var sql = "SELECT * FROM posts";
-        var result = await _npgsqlConnection.QueryAsync<Post>(sql);
+        var rawResult = await _npgsqlConnection.QueryAsync(sql);
+        if (rawResult == null)
+            return null!;
+
+        var result = rawResult.Select(x => new Post
+        {
+            Id = (Guid)x.post_uid,
+            UserId = (Guid)x.user_uid,
+            Title = (string)x.title,
+            Content = (string)x.content,
+            CreatedAt = (DateTime)x.created_at
+        });
         return result.ToList();
     }
 
-    public async Task<Post?> GetByIdAsync(string id)
+    public async Task<Post?> GetByIdAsync(Guid id)
     {
-        var sql = "SELECT * FROM posts WHERE post_id = @Id";
-        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<Post>(sql, new { Id = id }, transaction: _dbTransaction);
-        return result;
+        var sql = "SELECT * FROM posts WHERE post_uid = @Id";
+        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync(sql, new { Id = id });
+        if (result == null)
+            return null!;
+
+        var post = new Post
+        {
+            Id = (Guid)result.post_uid,
+            UserId = (Guid)result.user_uid,
+            Title = (string)result.title,
+            Content = (string)result.content,
+            CreatedAt = (DateTime)result.created_at
+        };
+        return post;
     }
 
     public async Task<Post> GetPostByTitle(string title)
     {
         var sql = "SELECT * FROM posts WHERE title = @Title";
-        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<Post>(sql, new { Title = title }, transaction: _dbTransaction);
-        return result!;
+        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync(sql, new { Title = title }, transaction: _dbTransaction);
+        if (result == null)
+            return null!;
+
+        var post = new Post
+        {
+            Id = (Guid)result.post_uid,
+            UserId = (Guid)result.user_uid,
+            Title = (string)result.title,
+            Content = (string)result.content,
+            CreatedAt = (DateTime)result.created_at
+        };
+        return post;
     }
-    public async Task<IReadOnlyList<Post>> GetPostsByUser(string id)
+    public async Task<IReadOnlyList<Post>> GetPostsByUser(Guid id)
     {
         var sql = """
-        SELECT * FROM posts WHERE user_id = @UserId
-        INNER JOIN user_blog ON posts.user_id = user_blog.user_id
+        SELECT * FROM posts WHERE user_uid = @UserId
+        INNER JOIN users ON posts.user_uid = users.user_uid
         """;
         var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
             (post, user) =>
@@ -77,7 +110,7 @@ public class PostRepository : IGenericRejpository<Post>, IPostRepository
             title = @Title,
             content = @Content,
             created_at = @CreatedAt,
-            WHERE id = @Id
+            WHERE post_uid = @Id
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, post, transaction: _dbTransaction);
         return result;

@@ -12,7 +12,7 @@ public static class ReplyCommentsEndPoint
         return TypedResults.Ok(result);
     }
 
-    public static async Task<IResult> GetReplyCommentsById(string id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> GetReplyCommentsById(Guid id, IUnitOfWork _unitOfWork)
     {
         var result = await _unitOfWork.ReplyComments.GetByIdAsync(id);
         if (result == null)
@@ -20,7 +20,7 @@ public static class ReplyCommentsEndPoint
         return TypedResults.Ok(result);
     }
 
-    public static async Task<IResult> GetReplyCommentsByParent(string id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> GetReplyCommentsByParent(Guid id, IUnitOfWork _unitOfWork)
     {
         var result = await _unitOfWork.ReplyComments.GetReplyCommentsByParent(id);
         if (result == null)
@@ -28,7 +28,7 @@ public static class ReplyCommentsEndPoint
         return TypedResults.Ok(result);
     }
 
-    public static async Task<IResult> GetReplyCommentsByUser(string id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> GetReplyCommentsByUser(Guid id, IUnitOfWork _unitOfWork)
     {
         var result = await _unitOfWork.ReplyComments.GetReplyCommentsByUser(id);
         if (result == null)
@@ -50,7 +50,7 @@ public static class ReplyCommentsEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> EditReplyComments(string id, IUnitOfWork _unitOfWork, ReplyComments replyComments)
+    public static async Task<IResult> EditReplyComments(Guid id, IUnitOfWork _unitOfWork, ReplyComments replyComments)
     {
         if (replyComments == null)
             return TypedResults.BadRequest("The post is empty");
@@ -69,7 +69,7 @@ public static class ReplyCommentsEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> DeleteReplyComments(string id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> DeleteReplyComments(Guid id, IUnitOfWork _unitOfWork)
     {
         var post = await _unitOfWork.ReplyComments.GetByIdAsync(id);
 

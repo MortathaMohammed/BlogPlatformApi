@@ -12,7 +12,7 @@ public static class TagEndPoint
         return TypedResults.Ok(result);
     }
 
-    public static async Task<IResult> GetTagById(string id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> GetTagById(Guid id, IUnitOfWork _unitOfWork)
     {
         var result = await _unitOfWork.Tags.GetByIdAsync(id);
         if (result == null)
@@ -34,7 +34,7 @@ public static class TagEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> EditTag(string id, IUnitOfWork _unitOfWork, Tags tags)
+    public static async Task<IResult> EditTag(Guid id, IUnitOfWork _unitOfWork, Tags tags)
     {
         if (tags == null)
             return TypedResults.BadRequest("The post is empty");
@@ -53,7 +53,7 @@ public static class TagEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> DeleteTag(string id, IUnitOfWork _unitOfWork)
+    public static async Task<IResult> DeleteTag(Guid id, IUnitOfWork _unitOfWork)
     {
         var post = await _unitOfWork.Tags.GetByIdAsync(id);
 

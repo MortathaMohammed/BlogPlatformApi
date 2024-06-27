@@ -19,40 +19,56 @@ public class TagsRepository : ITagsRepository
     public async Task<int> AddAsync(Tags tags)
     {
         var sql = """
-        INSERT INTO tags (tag_id, tag_name)
-        VALUES(@Id, @TagName)
+            INSERT INTO tags (tag_uid, tag_name)
+            VALUES(uuid_generate_v4(), @TagName)
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, tags, transaction: _dbTransaction);
         return result;
     }
 
-    public async Task<int> DeleteAsync(string id)
+    public async Task<int> DeleteAsync(Guid id)
     {
-        var sql = "DELETE FROM tags WHERE tag_id = @Id";
-        var result = await _npgsqlConnection.ExecuteAsync(sql, new { Id = id });
+        var sql = "DELETE FROM tags WHERE tag_uid = @Id";
+        var result = await _npgsqlConnection.ExecuteAsync(sql, new { Id = id }, transaction: _dbTransaction);
         return result;
     }
 
     public async Task<IReadOnlyList<Tags>> GetAllAsync()
     {
         var sql = "SELECT * FROM tags";
-        var result = await _npgsqlConnection.QueryAsync<Tags>(sql, transaction: _dbTransaction);
+        var rawResult = await _npgsqlConnection.QueryAsync(sql);
+        if (rawResult == null)
+            return null!;
+
+        var result = rawResult.Select(x => new Tags
+        {
+            Id = (Guid)x.tag_uid,
+            TagName = (string)x.tag_name
+        });
         return result.ToList();
     }
 
-    public async Task<Tags?> GetByIdAsync(string id)
+    public async Task<Tags?> GetByIdAsync(Guid id)
     {
-        var sql = "SELECT * FROM tags WHERE tag_id = @Id";
-        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<Tags>(sql, new { Id = id }, transaction: _dbTransaction);
-        return result;
+        var sql = "SELECT * FROM tags WHERE tag_uid = @Id";
+        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync(sql, new { Id = id });
+        if (result == null)
+            return null!;
+
+        var tag = new Tags
+        {
+            Id = (Guid)result.tag_uid,
+            TagName = (string)result.tag_name
+        };
+        return tag;
     }
 
     public async Task<int> UpdateAsync(Tags tags)
     {
         var sql = """
-        UPDATE tags SET
-        tag_name = @TagName
-        WHERE tag_id = @Id
+            UPDATE tags SET
+            tag_name = @TagName
+            WHERE tag_uid = @Id
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, tags, transaction: _dbTransaction);
         return result;
