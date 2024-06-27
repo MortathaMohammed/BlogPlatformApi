@@ -1,5 +1,6 @@
 
 using System.Data;
+using BlogPlatformApi.Mapping;
 using BlogPlatformApi.Models;
 using BlogPlatformApi.Services.Repository.IRepository;
 using Dapper;
@@ -37,71 +38,125 @@ public class PostRepository : IPostRepository
 
     public async Task<IReadOnlyList<Post>> GetAllAsync()
     {
-        var sql = "SELECT * FROM posts";
-        var rawResult = await _npgsqlConnection.QueryAsync(sql);
-        if (rawResult == null)
-            return null!;
-
+        var sql = """
+            SELECT * FROM posts 
+            INNER JOIN users ON posts.user_uid = users.user_uid
+        """;
+        var rawResult = await _npgsqlConnection.QueryAsync<PostMapp, BlogUserMapp, PostMapp>(sql,
+            (post, user) =>
+            {
+                post.User = user;
+                return post;
+            }, splitOn: "user_uid", transaction: _dbTransaction);
         var result = rawResult.Select(x => new Post
         {
-            Id = (Guid)x.post_uid,
-            UserId = (Guid)x.user_uid,
-            Title = (string)x.title,
-            Content = (string)x.content,
-            CreatedAt = (DateTime)x.created_at
+            Id = x.post_uid,
+            UserId = x.user_uid,
+            User = x.User,
+            Title = x.Title,
+            Content = x.Content,
+            CreatedAt = x.created_at
         });
         return result.ToList();
     }
 
     public async Task<Post?> GetByIdAsync(Guid id)
     {
-        var sql = "SELECT * FROM posts WHERE post_uid = @Id";
-        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync(sql, new { Id = id });
-        if (result == null)
+        var sql =
+        """
+            SELECT * FROM posts
+            INNER JOIN users ON posts.user_uid = users.user_uid
+            WHERE post_uid = @Id
+        """;
+        var result = await _npgsqlConnection.QueryAsync<PostMapp, BlogUserMapp, PostMapp>(sql,
+        (post, user) =>
+        {
+            post.User = user;
+            return post;
+        },
+
+        new { Id = id },
+        splitOn: "user_uid");
+        var postMap = result.FirstOrDefault();
+
+        if (postMap == null)
             return null!;
 
         var post = new Post
         {
-            Id = (Guid)result.post_uid,
-            UserId = (Guid)result.user_uid,
-            Title = (string)result.title,
-            Content = (string)result.content,
-            CreatedAt = (DateTime)result.created_at
+            Id = postMap.post_uid,
+            UserId = postMap.user_uid,
+            User = postMap.User,
+            Title = postMap.Title,
+            Content = postMap.Content,
+            CreatedAt = postMap.created_at
         };
+
         return post;
     }
 
     public async Task<Post> GetPostByTitle(string title)
     {
-        var sql = "SELECT * FROM posts WHERE title = @Title";
-        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync(sql, new { Title = title }, transaction: _dbTransaction);
-        if (result == null)
+        var sql =
+        """
+            SELECT * FROM posts
+            INNER JOIN users ON posts.user_uid = users.user_uid
+            WHERE title = @Title
+        """;
+        var result = await _npgsqlConnection.QueryAsync<PostMapp, BlogUserMapp, PostMapp>(sql,
+        (post, user) =>
+        {
+            post.User = user;
+            return post;
+        },
+
+        new { Title = title },
+        splitOn: "user_uid");
+        var postMap = result.FirstOrDefault();
+
+        if (postMap == null)
             return null!;
 
         var post = new Post
         {
-            Id = (Guid)result.post_uid,
-            UserId = (Guid)result.user_uid,
-            Title = (string)result.title,
-            Content = (string)result.content,
-            CreatedAt = (DateTime)result.created_at
+            Id = postMap.post_uid,
+            UserId = postMap.user_uid,
+            User = postMap.User,
+            Title = postMap.Title,
+            Content = postMap.Content,
+            CreatedAt = postMap.created_at
         };
+
         return post;
     }
+
     public async Task<IReadOnlyList<Post>> GetPostsByUser(Guid id)
     {
         var sql = """
-        SELECT * FROM posts WHERE user_uid = @UserId
-        INNER JOIN users ON posts.user_uid = users.user_uid
+            SELECT * FROM posts 
+            INNER JOIN users ON posts.user_uid = users.user_uid
+            WHERE posts.user_uid = @UserId
         """;
-        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
+        var rawResult = await _npgsqlConnection.QueryAsync<PostMapp, BlogUserMapp, PostMapp>(sql,
             (post, user) =>
             {
                 post.User = user;
                 return post;
-            }, new { UserId = id }, splitOn: "UserId", transaction: _dbTransaction);
+            }, new { UserId = id }, splitOn: "user_uid", transaction: _dbTransaction);
+        var result = rawResult.Select(x => new Post
+        {
+            Id = x.post_uid,
+            UserId = x.user_uid,
+            User = x.User,
+            Title = x.Title,
+            Content = x.Content,
+            CreatedAt = x.created_at
+        });
+
+
         return result.ToList();
     }
+
     public async Task<int> UpdateAsync(Post post)
     {
         var sql =

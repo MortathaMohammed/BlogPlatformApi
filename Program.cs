@@ -51,7 +51,7 @@ app.MapPut("/comment/edit/{id}", CommentEndPoint.EditComment);
 app.MapDelete("/comment/delete/{id}", CommentEndPoint.DeleteComment);
 #endregion
 
-#region Comment
+#region ReplyComment
 app.MapGet("/replycomments/user/{id}", ReplyCommentsEndPoint.GetReplyCommentsByUser);
 app.MapGet("/replycomments/parent/{id}", ReplyCommentsEndPoint.GetReplyCommentsByParent);
 app.MapGet("/replycomments/{id}", ReplyCommentsEndPoint.GetReplyCommentsById);
@@ -60,7 +60,7 @@ app.MapPut("/replycommetns/edit/{id}", ReplyCommentsEndPoint.EditReplyComments);
 app.MapDelete("/replycomments/delete/{id}", ReplyCommentsEndPoint.DeleteReplyComments);
 #endregion
 
-#region Comment
+#region Tags
 app.MapGet("/tag/tags", TagEndPoint.GetTags);
 app.MapGet("/tag/{id}", TagEndPoint.GetTagById);
 app.MapPost("/tag/add", TagEndPoint.AddTag);

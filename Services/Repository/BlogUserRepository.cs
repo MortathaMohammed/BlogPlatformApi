@@ -55,7 +55,6 @@ public class BlogUserRepository : IBlogUserRepository
         return result.ToList();
     }
 
-
     public async Task<BlogUser?> GetByIdAsync(Guid id)
     {
         var sql = "SELECT * FROM users WHERE user_uid = @Id";
