@@ -1,3 +1,4 @@
+using BlogPlatformApi.Mapping.Comments;
 using BlogPlatformApi.Models;
 using BlogPlatformApi.Services.Repository.IRepository;
 
@@ -9,15 +10,24 @@ public static class CommentEndPoint
         var comments = await _unitOfWork.Comments.GetCommentsByPostId(id);
         if (comments == null)
             return TypedResults.NotFound();
-        return TypedResults.Ok(comments);
+        return TypedResults.Ok(comments.Select(comment => comment.AsDto()).ToList());
     }
+
+    public static async Task<IResult> GetComments(IUnitOfWork _unitOfWork)
+    {
+        var comments = await _unitOfWork.Comments.GetAllAsync();
+        if (comments == null)
+            return TypedResults.NotFound();
+        return TypedResults.Ok(comments.Select(comment => comment.AsDto()).ToList());
+    }
+
 
     public static async Task<IResult> GetCommentsByUser(Guid id, IUnitOfWork _unitOfWork)
     {
         var result = await _unitOfWork.Comments.GetCommentsByUserId(id);
         if (result == null)
             return TypedResults.NotFound();
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.Select(comment => comment.AsDto()).ToList());
     }
 
     public static async Task<IResult> GetCommentById(Guid id, IUnitOfWork _unitOfWork)
@@ -25,15 +35,15 @@ public static class CommentEndPoint
         var result = await _unitOfWork.Comments.GetByIdAsync(id);
         if (result == null)
             return TypedResults.NotFound();
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.AsDto());
     }
 
-    public static async Task<IResult> AddComment(IUnitOfWork _unitOfWork, Comment comment)
+    public static async Task<IResult> AddComment(IUnitOfWork _unitOfWork, CreateCommentDto comment)
     {
         if (comment == null)
             return TypedResults.BadRequest("Empty body");
 
-        var result = await _unitOfWork.Comments.AddAsync(comment);
+        var result = await _unitOfWork.Comments.AddAsync(comment.ToCommentFromCreate());
         _unitOfWork.Commit();
 
         if (result == 0)
@@ -42,7 +52,7 @@ public static class CommentEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> EditComment(Guid id, IUnitOfWork _unitOfWork, Comment comment)
+    public static async Task<IResult> EditComment(Guid id, IUnitOfWork _unitOfWork, UpdateCommentDto comment)
     {
         if (comment == null)
             return TypedResults.BadRequest("Empty body");
@@ -52,7 +62,7 @@ public static class CommentEndPoint
         if (findUser == null)
             return TypedResults.NotFound();
 
-        var result = await _unitOfWork.Comments.UpdateAsync(comment);
+        var result = await _unitOfWork.Comments.UpdateAsync(comment.ToCommentFromUpdate());
         _unitOfWork.Commit();
 
         if (result == 0)

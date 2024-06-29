@@ -1,3 +1,4 @@
+using BlogPlatformApi.Mapping.Posts;
 using BlogPlatformApi.Models;
 using BlogPlatformApi.Services.Repository.IRepository;
 
@@ -9,7 +10,8 @@ public static class PostEndPoint
         var result = await _unitOfWork.Posts.GetAllAsync();
         if (result == null)
             return TypedResults.NotFound();
-        return TypedResults.Ok(result);
+
+        return TypedResults.Ok(result.Select(post => post.AsDto()).ToList());
     }
 
     public static async Task<IResult> GetPostsByUser(Guid id, IUnitOfWork _unitOfWork)
@@ -17,7 +19,7 @@ public static class PostEndPoint
         var result = await _unitOfWork.Posts.GetPostsByUser(id);
         if (result == null)
             return TypedResults.NotFound();
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.Select(post => post.AsDto()));
     }
 
     public static async Task<IResult> GetPostById(Guid id, IUnitOfWork _unitOfWork)
@@ -25,10 +27,10 @@ public static class PostEndPoint
         var result = await _unitOfWork.Posts.GetByIdAsync(id);
         if (result == null)
             return TypedResults.NotFound();
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.AsDto());
     }
 
-    public static async Task<IResult> AddPost(IUnitOfWork _unitOfWork, Post post)
+    public static async Task<IResult> AddPost(IUnitOfWork _unitOfWork, CreatePostDto post)
     {
         if (post == null)
             return TypedResults.BadRequest();
@@ -38,7 +40,7 @@ public static class PostEndPoint
         if (postEx != null)
             return TypedResults.BadRequest("User already existes");
 
-        var result = await _unitOfWork.Posts.AddAsync(post);
+        var result = await _unitOfWork.Posts.AddAsync(post.ToPostFromCreate());
         _unitOfWork.Commit();
 
         if (result == 0)
@@ -47,7 +49,7 @@ public static class PostEndPoint
         return TypedResults.Ok();
     }
 
-    public static async Task<IResult> EditPost(Guid id, IUnitOfWork _unitOfWork, Post post)
+    public static async Task<IResult> EditPost(Guid id, IUnitOfWork _unitOfWork, UpdatePostDto post)
     {
         if (post == null)
             return TypedResults.BadRequest("The post is empty");
@@ -62,7 +64,7 @@ public static class PostEndPoint
         if (postEx != null)
             return TypedResults.BadRequest("User already existes");
 
-        var result = await _unitOfWork.Posts.UpdateAsync(post);
+        var result = await _unitOfWork.Posts.UpdateAsync(post.ToPostFromUpdate());
         _unitOfWork.Commit();
 
         if (result == 0)

@@ -23,7 +23,7 @@ public class PostRepository : IPostRepository
         var sql =
         """
             INSERT INTO posts(post_uid, user_uid, title, content, created_at)
-            VALUES (uuid_generate_v4(), @UserId, @Title, @Content, @CreatedAt)
+            VALUES (uuid_generate_v4(), @user_uid, @title, @content, @created_at)
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, post, transaction: _dbTransaction);
         return result;
@@ -31,8 +31,8 @@ public class PostRepository : IPostRepository
 
     public async Task<int> DeleteAsync(Guid id)
     {
-        var sql = "DELETE FROM posts WHERE post_uid = @Id";
-        var result = await _npgsqlConnection.ExecuteAsync(sql, new { Id = id }, transaction: _dbTransaction);
+        var sql = "DELETE FROM posts WHERE post_uid = @post_uid";
+        var result = await _npgsqlConnection.ExecuteAsync(sql, new { post_uid = id }, transaction: _dbTransaction);
         return result;
     }
 
@@ -42,21 +42,13 @@ public class PostRepository : IPostRepository
             SELECT * FROM posts 
             INNER JOIN users ON posts.user_uid = users.user_uid
         """;
-        var rawResult = await _npgsqlConnection.QueryAsync<PostMapp, BlogUserMapp, PostMapp>(sql,
+        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
             (post, user) =>
             {
-                post.User = user;
+                post.user = user;
                 return post;
             }, splitOn: "user_uid", transaction: _dbTransaction);
-        var result = rawResult.Select(x => new Post
-        {
-            Id = x.post_uid,
-            UserId = x.user_uid,
-            User = x.User,
-            Title = x.Title,
-            Content = x.Content,
-            CreatedAt = x.created_at
-        });
+
         return result.ToList();
     }
 
@@ -66,31 +58,21 @@ public class PostRepository : IPostRepository
         """
             SELECT * FROM posts
             INNER JOIN users ON posts.user_uid = users.user_uid
-            WHERE post_uid = @Id
+            WHERE post_uid = @post_uid
         """;
-        var result = await _npgsqlConnection.QueryAsync<PostMapp, BlogUserMapp, PostMapp>(sql,
+        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
         (post, user) =>
         {
-            post.User = user;
+            post.user = user;
             return post;
         },
 
-        new { Id = id },
+        new { post_uid = id },
         splitOn: "user_uid");
-        var postMap = result.FirstOrDefault();
+        var post = result.FirstOrDefault();
 
-        if (postMap == null)
+        if (post == null)
             return null!;
-
-        var post = new Post
-        {
-            Id = postMap.post_uid,
-            UserId = postMap.user_uid,
-            User = postMap.User,
-            Title = postMap.Title,
-            Content = postMap.Content,
-            CreatedAt = postMap.created_at
-        };
 
         return post;
     }
@@ -101,31 +83,21 @@ public class PostRepository : IPostRepository
         """
             SELECT * FROM posts
             INNER JOIN users ON posts.user_uid = users.user_uid
-            WHERE title = @Title
+            WHERE title = @title
         """;
-        var result = await _npgsqlConnection.QueryAsync<PostMapp, BlogUserMapp, PostMapp>(sql,
+        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
         (post, user) =>
         {
-            post.User = user;
+            post.user = user;
             return post;
         },
 
-        new { Title = title },
+        new { title },
         splitOn: "user_uid");
-        var postMap = result.FirstOrDefault();
+        var post = result.FirstOrDefault();
 
-        if (postMap == null)
+        if (post == null)
             return null!;
-
-        var post = new Post
-        {
-            Id = postMap.post_uid,
-            UserId = postMap.user_uid,
-            User = postMap.User,
-            Title = postMap.Title,
-            Content = postMap.Content,
-            CreatedAt = postMap.created_at
-        };
 
         return post;
     }
@@ -135,24 +107,14 @@ public class PostRepository : IPostRepository
         var sql = """
             SELECT * FROM posts 
             INNER JOIN users ON posts.user_uid = users.user_uid
-            WHERE posts.user_uid = @UserId
+            WHERE posts.user_uid = @user_uid
         """;
-        var rawResult = await _npgsqlConnection.QueryAsync<PostMapp, BlogUserMapp, PostMapp>(sql,
+        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
             (post, user) =>
             {
-                post.User = user;
+                post.user = user;
                 return post;
-            }, new { UserId = id }, splitOn: "user_uid", transaction: _dbTransaction);
-        var result = rawResult.Select(x => new Post
-        {
-            Id = x.post_uid,
-            UserId = x.user_uid,
-            User = x.User,
-            Title = x.Title,
-            Content = x.Content,
-            CreatedAt = x.created_at
-        });
-
+            }, new { user_uid = id }, splitOn: "user_uid", transaction: _dbTransaction);
 
         return result.ToList();
     }
@@ -162,12 +124,16 @@ public class PostRepository : IPostRepository
         var sql =
         """
             UPDATE posts SET
-            title = @Title,
-            content = @Content,
-            created_at = @CreatedAt,
-            WHERE post_uid = @Id
+            title = @title,
+            content = @content
+            WHERE post_uid = @post_uid
         """;
-        var result = await _npgsqlConnection.ExecuteAsync(sql, post, transaction: _dbTransaction);
+        var result = await _npgsqlConnection.ExecuteAsync(sql, new
+        {
+            post.title,
+            post.content,
+            post.post_uid
+        }, transaction: _dbTransaction);
         return result;
     }
 }

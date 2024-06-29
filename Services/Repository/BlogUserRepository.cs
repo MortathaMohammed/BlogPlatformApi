@@ -21,8 +21,8 @@ public class BlogUserRepository : IBlogUserRepository
     {
         var sql =
         """
-        INSERT INTO users (user_uid, username, email, password_hash,created_at, bio)
-        VALUES (uuid_generate_v4(), @Username, @Email, @PasswordHash, @CreatedAt, @Bio);
+        INSERT INTO users (user_uid, username, email, password_hash, created_at, bio)
+        VALUES (uuid_generate_v4(), @username, @email, @password_hash, @created_at, @bio);
         """;
         var result = await _npgsqlConnection.ExecuteAsync(sql, user, transaction: _dbTransaction);
         return result;
@@ -30,67 +30,38 @@ public class BlogUserRepository : IBlogUserRepository
 
     public async Task<int> DeleteAsync(Guid id)
     {
-        var sql = "DELETE FROM users WHERE user_uid = @Id";
-        var result = await _npgsqlConnection.ExecuteAsync(sql, new { Id = id }, transaction: _dbTransaction);
+        var sql = "DELETE FROM users WHERE user_uid = @user_uid";
+        var result = await _npgsqlConnection.ExecuteAsync(sql, new { user_uid = id }, transaction: _dbTransaction);
         return result;
     }
 
     public async Task<IReadOnlyList<BlogUser>> GetAllAsync()
     {
         var sql = "SELECT  * FROM users";
-        var rawResult = await _npgsqlConnection.QueryAsync(sql);
-        if (rawResult == null)
+        var result = await _npgsqlConnection.QueryAsync<BlogUser>(sql);
+        if (result == null)
             return null!;
-
-        var result = rawResult.Select(x => new BlogUser
-        {
-            Id = (Guid)x.user_uid,
-            Username = (string)x.username,
-            Email = (string)x.email,
-            Bio = (string)x.bio,
-            PasswordHash = (string)x.password_hash,
-            CreatedAt = (DateTime)x.created_at
-        });
 
         return result.ToList();
     }
 
     public async Task<BlogUser?> GetByIdAsync(Guid id)
     {
-        var sql = "SELECT * FROM users WHERE user_uid = @Id";
-        var result = await _npgsqlConnection.QuerySingleOrDefaultAsync(sql, new { Id = id }, transaction: _dbTransaction);
+        var sql = "SELECT * FROM users WHERE user_uid = @user_uid";
+        var result = await _npgsqlConnection.QuerySingleOrDefaultAsync<BlogUser>(sql, new { user_uid = id }, transaction: _dbTransaction);
         if (result == null)
             return null!;
-
-        var user = new BlogUser
-        {
-            Id = (Guid)result!.user_uid,
-            Username = (string)result.username,
-            Email = (string)result.email,
-            Bio = (string)result.bio,
-            PasswordHash = (string)result.password_hash,
-            CreatedAt = (DateTime)result.created_at
-        };
-        return user;
+        return result;
     }
 
     public async Task<BlogUser> GetUserByUserName(string userName)
     {
-        var sql = "SELECT * FROM users WHERE username = @Username";
-        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync(sql, new { Username = userName }, transaction: _dbTransaction);
+        var sql = "SELECT * FROM users WHERE username = @username";
+        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<BlogUser>(sql, new { username = userName }, transaction: _dbTransaction);
         if (result == null)
             return null!;
 
-        var user = new BlogUser
-        {
-            Id = (Guid)result!.user_uid,
-            Username = (string)result.username,
-            Email = (string)result.email,
-            Bio = (string)result.bio,
-            PasswordHash = (string)result.password_hash,
-            CreatedAt = (DateTime)result.created_at
-        };
-        return user;
+        return result;
     }
 
     public async Task<int> UpdateAsync(BlogUser user)
@@ -98,14 +69,18 @@ public class BlogUserRepository : IBlogUserRepository
         var sql =
         """
         UPDATE users SET  
-        username = @Username,
-        email = @Email,
-        password_hash = @PasswordHash,
-        created_at = @CreatedAt
-        bio = @Bio 
-        WHERE user_uid = @Id
+        username = @username,
+        email = @email,
+        bio = @bio 
+        WHERE user_uid = @user_uid
         """;
-        var result = await _npgsqlConnection.ExecuteAsync(sql, user, transaction: _dbTransaction);
+        var result = await _npgsqlConnection.ExecuteAsync(sql, new
+        {
+            user.username,
+            user.email,
+            user.bio,
+            user.user_uid
+        }, transaction: _dbTransaction);
         return result;
     }
 }

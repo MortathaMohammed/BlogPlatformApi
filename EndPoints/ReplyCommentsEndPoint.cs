@@ -1,3 +1,4 @@
+using BlogPlatformApi.Mapping.ReplyComment;
 using BlogPlatformApi.Models;
 using BlogPlatformApi.Services.Repository.IRepository;
 
@@ -9,7 +10,7 @@ public static class ReplyCommentsEndPoint
         var result = await _unitOfWork.ReplyComments.GetAllAsync();
         if (result == null)
             return TypedResults.NotFound();
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(result.Select(reply => reply.AsDto()).ToList());
     }
 
     public static async Task<IResult> GetReplyCommentsById(Guid id, IUnitOfWork _unitOfWork)

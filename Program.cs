@@ -43,6 +43,7 @@ app.MapDelete("/post/delete/{id}", PostEndPoint.DeletePost);
 #endregion
 
 #region Comment
+app.MapGet("/comment/comments", CommentEndPoint.GetComments);
 app.MapGet("/comment/post/{id}", CommentEndPoint.GetCommentsByPost);
 app.MapGet("/comment/user/{id}", CommentEndPoint.GetCommentsByUser);
 app.MapGet("/comment/{id}", CommentEndPoint.GetCommentById);
@@ -52,6 +53,7 @@ app.MapDelete("/comment/delete/{id}", CommentEndPoint.DeleteComment);
 #endregion
 
 #region ReplyComment
+app.MapGet("/replycomments/comments", ReplyCommentsEndPoint.GetReplyComments);
 app.MapGet("/replycomments/user/{id}", ReplyCommentsEndPoint.GetReplyCommentsByUser);
 app.MapGet("/replycomments/parent/{id}", ReplyCommentsEndPoint.GetReplyCommentsByParent);
 app.MapGet("/replycomments/{id}", ReplyCommentsEndPoint.GetReplyCommentsById);

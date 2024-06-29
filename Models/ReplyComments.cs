@@ -1,9 +1,11 @@
 namespace BlogPlatformApi.Models;
 public class ReplyComments
 {
-    public Guid Id { get; set; }
-    public required Guid ParentCommentId { get; set; }
-    public required Guid UserId { get; set; }
-    public required string Content { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public Guid reply_uid { get; set; }
+    public Guid parent_comment_uid { get; set; }
+    public Comment comment { get; set; }
+    public Guid user_uid { get; set; }
+    public BlogUser user { get; set; }
+    public string content { get; set; }
+    public DateTime created_at { get; set; } = DateTime.Now;
 }
