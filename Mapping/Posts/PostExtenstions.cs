@@ -1,3 +1,4 @@
+using BlogPlatformApi.Mapping.Tag;
 using BlogPlatformApi.Mapping.User;
 using BlogPlatformApi.Models;
 
@@ -12,7 +13,8 @@ public static class PostExtenstions
             User = post.user.AsUserDto(),
             Title = post.title,
             Content = post.content,
-            CreatedAt = post.created_at
+            CreatedAt = post.created_at,
+            Tags = post.tags.Select(tag => tag.AsDto()).ToList()
         };
     }
 

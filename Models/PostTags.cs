@@ -1,6 +1,11 @@
+
 namespace BlogPlatformApi.Models;
 public class PostTags
 {
-    public required string post_uid { get; set; }
-    public required string tag_uid { get; set; }
+    public Guid post_uid { get; set; }
+    public Post Post { get; set; }
+
+    public Guid tag_uid { get; set; }
+    public Tags Tag { get; set; }
+
 }

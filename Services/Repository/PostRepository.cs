@@ -29,10 +29,33 @@ public class PostRepository : IPostRepository
         return result;
     }
 
+    public async Task<int> AddPostTagId(PostTags postTags)
+    {
+        var sql =
+        """
+            INSERT INTO post_tags(post_uid, tag_uid)
+            VALUES (@PostId, @TagId)
+        """;
+        var result = await _npgsqlConnection.ExecuteAsync(sql, new { PostId = postTags.post_uid, TagId = postTags.tag_uid }, transaction: _dbTransaction);
+        return result;
+    }
+
     public async Task<int> DeleteAsync(Guid id)
     {
         var sql = "DELETE FROM posts WHERE post_uid = @post_uid";
         var result = await _npgsqlConnection.ExecuteAsync(sql, new { post_uid = id }, transaction: _dbTransaction);
+        return result;
+    }
+
+    public async Task<int> DeletePostTagId(Guid postId, Guid tagId)
+    {
+        var sql =
+        """
+            DELETE FROM post_tags WHERE post_tags.post_uid = @PostId AND post_tags.tag_uid = @TagId
+        """;
+        var result = await _npgsqlConnection.ExecuteAsync(sql,
+        new { PostId = postId, TagId = tagId },
+        transaction: _dbTransaction);
         return result;
     }
 
@@ -41,13 +64,16 @@ public class PostRepository : IPostRepository
         var sql = """
             SELECT * FROM posts 
             INNER JOIN users ON posts.user_uid = users.user_uid
+            INNER JOIN post_tags ON posts.post_uid = post_tags.post_uid
+            INNER JOIN tags ON post_tags.tag_uid = tags.tag_uid
         """;
-        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
-            (post, user) =>
+        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Tags, Post>(sql,
+            (post, user, tags) =>
             {
                 post.user = user;
+                post.tags.Add(tags);
                 return post;
-            }, splitOn: "user_uid", transaction: _dbTransaction);
+            }, splitOn: "user_uid, post_uid", transaction: _dbTransaction);
 
         return result.ToList();
     }
@@ -58,17 +84,20 @@ public class PostRepository : IPostRepository
         """
             SELECT * FROM posts
             INNER JOIN users ON posts.user_uid = users.user_uid
-            WHERE post_uid = @post_uid
+            INNER JOIN post_tags ON posts.post_uid = post_tags.post_uid
+            INNER JOIN tags ON post_tags.tag_uid = tags.tag_uid
+            WHERE posts.post_uid = @PostId
         """;
-        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
-        (post, user) =>
+        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Tags, Post>(sql,
+        (post, user, tags) =>
         {
             post.user = user;
+            post.tags.Add(tags);
             return post;
         },
 
-        new { post_uid = id },
-        splitOn: "user_uid");
+        new { PostId = id },
+        splitOn: "user_uid, post_uid");
         var post = result.FirstOrDefault();
 
         if (post == null)
@@ -83,17 +112,20 @@ public class PostRepository : IPostRepository
         """
             SELECT * FROM posts
             INNER JOIN users ON posts.user_uid = users.user_uid
-            WHERE title = @title
+            INNER JOIN post_tags ON posts.post_uid = post_tags.post_uid
+            INNER JOIN tags ON post_tags.tag_uid = tags.tag_uid
+            WHERE title = @Title
         """;
-        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
-        (post, user) =>
+        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Tags, Post>(sql,
+        (post, user, tags) =>
         {
             post.user = user;
+            post.tags.Add(tags);
             return post;
         },
 
-        new { title },
-        splitOn: "user_uid");
+        new { Title = title },
+        splitOn: "user_uid, post_uid");
         var post = result.FirstOrDefault();
 
         if (post == null)
@@ -107,14 +139,17 @@ public class PostRepository : IPostRepository
         var sql = """
             SELECT * FROM posts 
             INNER JOIN users ON posts.user_uid = users.user_uid
-            WHERE posts.user_uid = @user_uid
+            INNER JOIN post_tags ON posts.post_uid = post_tags.post_uid
+            INNER JOIN tags ON post_tags.tag_uid = tags.tag_uid
+            WHERE posts.user_uid = @UserId
         """;
-        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Post>(sql,
-            (post, user) =>
+        var result = await _npgsqlConnection.QueryAsync<Post, BlogUser, Tags, Post>(sql,
+            (post, user, tags) =>
             {
                 post.user = user;
+                post.tags.Add(tags);
                 return post;
-            }, new { user_uid = id }, splitOn: "user_uid", transaction: _dbTransaction);
+            }, new { UserId = id }, splitOn: "user_uid, post_uid", transaction: _dbTransaction);
 
         return result.ToList();
     }
@@ -136,4 +171,6 @@ public class PostRepository : IPostRepository
         }, transaction: _dbTransaction);
         return result;
     }
+
+
 }

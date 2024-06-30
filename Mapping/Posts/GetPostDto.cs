@@ -1,3 +1,4 @@
+using BlogPlatformApi.Mapping.Tag;
 using BlogPlatformApi.Mapping.User;
 using BlogPlatformApi.Models;
 
@@ -9,4 +10,5 @@ public class GetPostDto
     public string Title { get; set; }
     public string Content { get; set; }
     public DateTime CreatedAt { get; set; }
+    public List<GetTagsDto> Tags { get; set; } = [];
 }

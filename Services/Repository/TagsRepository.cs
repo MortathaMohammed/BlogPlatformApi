@@ -37,9 +37,62 @@ public class TagsRepository : ITagsRepository
     {
         var sql = "SELECT * FROM tags";
         var result = await _npgsqlConnection.QueryAsync<Tags>(sql);
+
         if (result == null)
             return null!;
 
+        return result.ToList();
+    }
+
+    public async Task<IReadOnlyList<Tags>> GetTagsWithPostsByPostId(Guid id)
+    {
+        var sql =
+        """
+            SELECT * FROM tags
+            INNER JOIN post_tags ON tags.tag_uid = post_tags.tag_uid
+            INNER JOIN posts ON post_tags.post_uid = posts.post_uid
+            INNER JOIN users ON posts.user_uid = users.user_uid
+            WHERE post_tags.post_uid = @PostId
+        """;
+
+        var result = await _npgsqlConnection.QueryAsync<Tags, Post, BlogUser, Tags>(sql,
+        (tags, post, user) =>
+        {
+            post.user = user;
+            tags.posts.Add(post);
+            return tags;
+        },
+        new { PostId = id },
+        splitOn: "post_uid, user_uid",
+        transaction: _dbTransaction);
+        if (result == null)
+            return null!;
+        return result.ToList();
+    }
+
+    public async Task<IReadOnlyList<Tags>> GetPostsByTagId(Guid id)
+    {
+        var sql =
+        """
+            SELECT * FROM tags
+            INNER JOIN post_tags ON tags.tag_uid = post_tags.tag_uid
+            INNER JOIN posts ON post_tags.post_uid = posts.post_uid
+            INNER JOIN users ON posts.user_uid = users.user_uid
+            WHERE post_tags.tag_uid = @TagId
+        """;
+
+        var result = await _npgsqlConnection.QueryAsync<Tags, Post, BlogUser, Tags>(sql,
+        (tags, post, user) =>
+        {
+            post.user = user;
+            tags.posts.Add(post);
+            return tags;
+        },
+        new { TagId = id },
+        splitOn: "post_uid, user_uid",
+        transaction: _dbTransaction);
+        if (result == null)
+            return null!;
         return result.ToList();
     }
 
@@ -58,10 +111,19 @@ public class TagsRepository : ITagsRepository
     {
         var sql = """
             UPDATE tags SET
-            tag_name = @tag_name
-            WHERE tag_uid = @tag_uid
+            tag_name = @TagName
+            WHERE tag_uid = @TagId
         """;
-        var result = await _npgsqlConnection.ExecuteAsync(sql, tags, transaction: _dbTransaction);
+        var result = await _npgsqlConnection.ExecuteAsync(sql, new { TagName = tags.tag_name, TagId = tags.tag_uid }, transaction: _dbTransaction);
+        return result;
+    }
+
+    public async Task<Tags> GetTagByName(string name)
+    {
+        var sql = "SELECT * FROM tags WHERE tag_name = @TagName";
+        var result = await _npgsqlConnection.QueryFirstOrDefaultAsync<Tags>(sql, new { TagName = name });
+        if (result == null)
+            return null!;
         return result;
     }
 }

@@ -49,6 +49,17 @@ public static class PostEndPoint
         return TypedResults.Ok();
     }
 
+    public static async Task<IResult> AddPostTag(IUnitOfWork _unitOfWork, PostTags postTags)
+    {
+        var result = await _unitOfWork.Posts.AddPostTagId(postTags);
+        _unitOfWork.Commit();
+
+        if (result == 0)
+            return TypedResults.BadRequest();
+
+        return TypedResults.Ok();
+    }
+
     public static async Task<IResult> EditPost(Guid id, IUnitOfWork _unitOfWork, UpdatePostDto post)
     {
         if (post == null)
@@ -88,4 +99,17 @@ public static class PostEndPoint
 
         return TypedResults.Ok();
     }
+
+    public static async Task<IResult> DeletePostTag(Guid postid, Guid tagid, IUnitOfWork _unitOfWork)
+    {
+
+        var result = await _unitOfWork.Posts.DeletePostTagId(postid, tagid);
+        _unitOfWork.Commit();
+
+        if (result == 0)
+            return TypedResults.BadRequest();
+
+        return TypedResults.Ok();
+    }
+
 }

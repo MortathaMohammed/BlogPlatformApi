@@ -8,4 +8,5 @@ public class Post
     public string title { get; set; }
     public string content { get; set; }
     public DateTime created_at { get; set; } = DateTime.Now;
+    public List<Tags> tags { get; set; } = [];
 }

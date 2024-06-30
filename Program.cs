@@ -38,6 +38,8 @@ app.MapGet("/post/posts", PostEndPoint.GetPosts);
 app.MapGet("/post/user/{id}", PostEndPoint.GetPostsByUser);
 app.MapGet("/post/{id}", PostEndPoint.GetPostById);
 app.MapPost("/post/add", PostEndPoint.AddPost);
+app.MapPost("/post/addpostwithtag", PostEndPoint.AddPostTag);
+app.MapDelete("/post/delete/posttag/{postid}/{tagid}", PostEndPoint.DeletePostTag);
 app.MapPut("/post/edit/{id}", PostEndPoint.EditPost);
 app.MapDelete("/post/delete/{id}", PostEndPoint.DeletePost);
 #endregion
@@ -64,6 +66,7 @@ app.MapDelete("/replycomments/delete/{id}", ReplyCommentsEndPoint.DeleteReplyCom
 
 #region Tags
 app.MapGet("/tag/tags", TagEndPoint.GetTags);
+app.MapGet("/tag/post/{id}", TagEndPoint.GetPostsByTag);
 app.MapGet("/tag/{id}", TagEndPoint.GetTagById);
 app.MapPost("/tag/add", TagEndPoint.AddTag);
 app.MapPut("/tag/edit/{id}", TagEndPoint.EditTag);
